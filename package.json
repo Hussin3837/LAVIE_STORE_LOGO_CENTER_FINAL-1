@@ -1,0 +1,24 @@
+{
+  "name": "lavie-store",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --webpack",
+    "build": "next build"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.106.0",
+    "framer-motion": "^12.39.0",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "stripe": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "25.8.0",
+    "@types/react": "19.2.14",
+    "autoprefixer": "latest",
+    "postcss": "latest",
+    "tailwindcss": "^3.4.17",
+    "typescript": "6.0.3"
+  }
+}
