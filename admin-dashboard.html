@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LA VIE Dashboard</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            background: #050505;
+            color: #f5f0e8;
+            font-family: Arial, sans-serif;
+            padding: 30px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #b38a52;
+            border-bottom: 1px solid #b38a52;
+            padding-bottom: 10px;
+        }
+        .card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        input, textarea, select {
+            padding: 10px;
+            margin: 5px 0 15px 0;
+            width: 100%;
+            max-width: 400px;
+            background: #1a1a1a;
+            border: 1px solid #b38a52;
+            color: white;
+            border-radius: 8px;
+        }
+        button {
+            background: #b38a52;
+            color: black;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+        .delete-btn {
+            background: #8b0000;
+            color: white;
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✨ لوحة تحكم LA VIE</h1>
+        
+        <div class="card">
+            <h2>➕ إضافة منتج جديد</h2>
+            <input type="text" id="productName" placeholder="اسم المنتج">
+            <br>
+            <input type="number" id="productPrice" placeholder="السعر (€)">
+            <br>
+            <textarea id="productDesc" placeholder="وصف المنتج"></textarea>
+            <br>
+            <button onclick="addProduct()">إضافة المنتج</button>
+            <div id="addResult"></div>
+        </div>
+
+        <div class="card">
+            <h2>📦 قائمة المنتجات</h2>
+            <div id="productsList">جاري التحميل...</div>
+        </div>
+    </div>
+
+    <script>
+        async function loadProducts() {
+            try {
+                const res = await fetch('/api/products');
+                const products = await res.json();
+                if (Array.isArray(products)) {
+                    let html = '<table><tr><th>الاسم</th><th>السعر</th><th>العمليات</th></tr>';
+                    products.forEach(p => {
+                        html += `<tr>
+                            <td>${p.name}</td>
+                            <td>€${p.price}</td>
+                            <td><button class="delete-btn" onclick="deleteProduct('${p.id}')">حذف</button></td>
+                        </tr>`;
+                    });
+                    html += '</table>';
+                    document.getElementById('productsList').innerHTML = html;
+                } else {
+                    document.getElementById('productsList').innerHTML = 'لا توجد منتجات';
+                }
+            } catch(e) {
+                document.getElementById('productsList').innerHTML = 'خطأ في تحميل المنتجات';
+            }
+        }
+
+        async function addProduct() {
+            const name = document.getElementById('productName').value;
+            const price = parseFloat(document.getElementById('productPrice').value);
+            const description = document.getElementById('productDesc').value;
+            
+            if (!name || !price) {
+                document.getElementById('addResult').innerHTML = 'الرجاء إ填写 اسم المنتج والسعر';
+                return;
+            }
+            
+            const res = await fetch('/api/products', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({name, price, description})
+            });
+            
+            if (res.ok) {
+                document.getElementById('addResult').innerHTML = 'تمت الإضافة بنجاح ✅';
+                document.getElementById('productName').value = '';
+                document.getElementById('productPrice').value = '';
+                document.getElementById('productDesc').value = '';
+                loadProducts();
+            } else {
+                document.getElementById('addResult').innerHTML = 'خطأ في الإضافة';
+            }
+        }
+        
+        async function deleteProduct(id) {
+            if (confirm('هل أنت متأكد من الحذف؟')) {
+                await fetch('/api/products', {
+                    method: 'DELETE',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({id})
+                });
+                loadProducts();
+            }
+        }
+        
+        loadProducts();
+    </script>
+</body>
+</html>
