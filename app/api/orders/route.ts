@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
-import { supabase } from "../../../lib/supabase";
+import { createClient } from '@supabase/supabase-js';
+
+// إنشاء اتصال Supabase مباشرة هنا
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export async function GET() {
   const { data, error } = await supabase.from("orders").select("*").order("date", { ascending: false });
